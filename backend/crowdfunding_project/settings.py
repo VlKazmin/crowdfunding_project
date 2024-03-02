@@ -33,7 +33,6 @@ CORS_ALLOW_METHODS = [
     "PUT",
     "FETCH",
 ]
-# CSRF_TRUSTED_ORIGINS = ["https://"]
 
 if LOCAL:
     DEBUG = True
@@ -47,8 +46,6 @@ else:
     ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 print(f"DEBUG --> {DEBUG}")
-
-# Application definition
 
 
 AUTH_USER_MODEL = "users.CustomUser"
