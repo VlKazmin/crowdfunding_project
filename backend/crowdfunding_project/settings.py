@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
 
 from pathlib import Path
@@ -17,23 +18,37 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+LOCAL = bool(os.getenv("LOCAL", default="True") == "True")
 BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = (
+    "django-insecure-0z&ou71qvw1e3*wc_8@puw1yb+(w-4ndp)py&$t)&tksqxmh11"
+)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+    "FETCH",
+]
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8000"]
 
+if LOCAL:
+    DEBUG = True
+    LOCAL_DB = False
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+else:
+    DEBUG = bool(os.getenv("DEBUG", default="False") == "True")
+    LOCAL_DB = bool(os.getenv("LOCAL_DB", default="False") == "True")
+    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-0z&ou71qvw1e3*wc_8@puw1yb+(w-4ndp)py&$t)&tksqxmh11"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["localhost"]
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']
+print(f"DEBUG --> {DEBUG}")
 
 # Application definition
+
 
 AUTH_USER_MODEL = "users.CustomUser"
 
@@ -50,8 +65,8 @@ INSTALLED_APPS = [
     "collects",
     "rest_framework",
     "djoser",
-    'autoslug',
-    'drf_spectacular',
+    "autoslug",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -86,14 +101,27 @@ WSGI_APPLICATION = "crowdfunding_project.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if LOCAL_DB:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+    print("Sqlite3 database configured")
+
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "name"),
+            "USER": os.getenv("POSTGRES_USER", "user"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", ""),
+            "PORT": os.getenv("DB_PORT", 5432),
+        }
+    }
+    print("PostgreSQL database configured")
 
 
 # Password validation
@@ -157,17 +185,17 @@ DJOSER = {
         "user_list": "users.serializers.UserSerializer",
         "current_user": "users.serializers.UserSerializer",
         "user_create": "users.serializers.UserSerializer",
-    }
+    },
 }
 
 EMAIL_HOST_USER = "host"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
 

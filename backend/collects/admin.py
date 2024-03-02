@@ -3,6 +3,13 @@ from django.contrib import admin
 from .models import Collect
 
 
+class CollectContributorsInline(admin.TabularInline):
+    model = Collect.contributors.through
+    verbose_name = "Участник"
+    verbose_name_plural = "Участники"
+    extra = 0
+
+
 @admin.register(Collect)
 class CollectAdmin(admin.ModelAdmin):
     list_display = (
@@ -12,19 +19,25 @@ class CollectAdmin(admin.ModelAdmin):
         "occasion",
         "planned_amount",
         "collected_amount",
+        "left_to_collect",
         "end_datetime",
         "status",
     )
-    search_fields = ("author__username", "title", "occasion", "status")
+    search_fields = (
+        "author__username",
+        "title",
+        "occasion",
+        "status",
+    )
     list_filter = ("occasion", "status", "end_datetime")
     date_hierarchy = "end_datetime"
     ordering = ("-end_datetime",)
 
-    readonly_fields = ("contributors_count", "left_to_collect")
+    readonly_fields = ("left_to_collect",)
 
     fieldsets = (
         (
-            None,
+            "Информация",
             {
                 "fields": (
                     "author",
@@ -35,22 +48,18 @@ class CollectAdmin(admin.ModelAdmin):
                     "collected_amount",
                     "end_datetime",
                     "status",
+                    "left_to_collect",
                 )
             },
         ),
         (
-            "Участники",
+            "Изображения",
             {
-                "fields": ("contributors", "contributors_count"),
-            },
-        ),
-        (
-            "Дополнительно",
-            {
-                "fields": ("cover_image", "slug"),
+                "fields": ("cover_image",),
             },
         ),
     )
+    inlines = [CollectContributorsInline]
 
     def left_to_collect(self, obj):
         return obj.left_to_collect()

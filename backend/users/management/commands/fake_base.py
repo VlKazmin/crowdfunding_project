@@ -1,18 +1,19 @@
+from faker import Faker
+
 import random
 
-from django.db import IntegrityError
-from django.core.management.base import BaseCommand
 from django.core.management import call_command
+from django.core.management.base import BaseCommand
+from django.db import IntegrityError
+from django.contrib.auth import get_user_model
 from django.utils.timezone import make_aware
 
-from users.models import CustomUser
 from collects.models import Collect
 from collects.texts import OCCASION_CHOICES
 from payments.models import Payment
+from users.models import CustomUser
 
-from faker import Faker
-
-QUANITY = 1000
+QUANITY = 10
 
 
 class Command(BaseCommand):
@@ -37,6 +38,23 @@ class Command(BaseCommand):
 
     def populate_users(self):
         faker = Faker()
+
+        superuser_username = "admin"
+        superuser_email = "admin@admin.com"
+        superuser_password = "admin"
+
+        try:
+            get_user_model().objects.create_superuser(
+                username=superuser_username,
+                email=superuser_email,
+                password=superuser_password,
+            )
+            self.stdout.write(self.style.SUCCESS("Суперпользователь создан."))
+        except IntegrityError:
+            pass
+
+        self.stdout.write(self.style.SUCCESS("Пользователи созданы."))
+
         for _ in range(QUANITY):
             try:
 
@@ -60,12 +78,7 @@ class Command(BaseCommand):
     def populate_collects(self):
         faker = Faker()
         users = CustomUser.objects.all()
-        occasions = [
-            OCCASION_CHOICES[i][1]
-            for i in range(
-                len(OCCASION_CHOICES),
-            )
-        ]
+        occasions = [choice[0] for choice in OCCASION_CHOICES]
 
         for _ in range(QUANITY):
             try:
@@ -75,7 +88,6 @@ class Command(BaseCommand):
                 description = faker.text()
                 planned_amount = round(random.uniform(100, 300), 2)
                 end_datetime = faker.future_datetime()
-                status = random.choice(["active", "completed", "expired"])
 
                 Collect.objects.create(
                     author=author,
@@ -84,7 +96,6 @@ class Command(BaseCommand):
                     description=description,
                     planned_amount=planned_amount,
                     end_datetime=make_aware(end_datetime),
-                    status=status,
                 )
 
             except IntegrityError:
