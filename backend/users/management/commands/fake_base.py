@@ -18,7 +18,7 @@ from collects.texts import OCCASION_CHOICES
 from payments.models import Payment
 from users.models import CustomUser
 
-QUANITY = 1500
+QUANITY = 3000
 
 
 class Command(BaseCommand):
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         faker = Faker()
 
         superuser_username = "admin"
-        superuser_email = "admin@admin.com"
+        superuser_email = "a@a.a"
         superuser_password = "admin"
 
         try:

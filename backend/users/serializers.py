@@ -16,14 +16,25 @@ class UserSerializer(UserCreateSerializer):
             "password",
         ]
 
-    def to_representation(self, instance):
-        """
-        Преобразует объект пользователя в представление JSON.
-        """
-        data = super().to_representation(instance)
-        request = self.context.get("request")
+        extra_kwargs = {
+            "username": {"required": True},
+            "email": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+            "password": {
+                "required": True,
+                "write_only": True,
+            },
+        }
 
-        if request.method == "GET":
-            data.pop("password", None)
+    # def to_representation(self, instance):
+    #     """
+    #     Преобразует объект пользователя в представление JSON.
+    #     """
+    #     data = super().to_representation(instance)
+    #     request = self.context.get("request")
 
-        return data
+    #     if request.method == "GET":
+    #         data.pop("password", None)
+
+    #     return data

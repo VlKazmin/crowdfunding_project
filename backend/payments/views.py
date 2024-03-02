@@ -25,7 +25,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save()
+        user_id = self.request.user.id
+        serializer.save(user_id=user_id)
         cache.delete("payment_list")
 
     def perform_update(self, serializer):

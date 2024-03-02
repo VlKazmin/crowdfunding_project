@@ -23,5 +23,6 @@ router_v1.register(r"payments", PaymentViewSet, basename="payment")
 # URL
 urlpatterns = [
     path("", include(router_v1.urls)),
+    path(r"auth/", include("djoser.urls.authtoken")),
     path("swagger/", SpectacularSwaggerView.as_view(), name="swagger"),
 ]

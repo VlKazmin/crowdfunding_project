@@ -33,7 +33,10 @@ class CollectAdmin(admin.ModelAdmin):
     date_hierarchy = "end_datetime"
     ordering = ("-end_datetime",)
 
-    readonly_fields = ("left_to_collect",)
+    readonly_fields = (
+        "collected_amount",
+        "left_to_collect",
+    )
 
     fieldsets = (
         (

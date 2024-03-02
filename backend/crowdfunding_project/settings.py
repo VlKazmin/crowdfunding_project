@@ -33,7 +33,7 @@ CORS_ALLOW_METHODS = [
     "PUT",
     "FETCH",
 ]
-CSRF_TRUSTED_ORIGINS = ["https://localhost:8000"]
+# CSRF_TRUSTED_ORIGINS = ["https://"]
 
 if LOCAL:
     DEBUG = True
@@ -43,7 +43,8 @@ if LOCAL:
 else:
     DEBUG = bool(os.getenv("DEBUG", default="False") == "True")
     LOCAL_DB = bool(os.getenv("LOCAL_DB", default="False") == "True")
-    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+    # ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 print(f"DEBUG --> {DEBUG}")
 
@@ -64,6 +65,7 @@ INSTALLED_APPS = [
     "payments",
     "collects",
     "rest_framework",
+    "rest_framework.authtoken",
     "djoser",
     "autoslug",
     "drf_spectacular",
@@ -195,22 +197,18 @@ EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     }
 }
 
-CACHE_TIMEOUT = 60 * 15
 
 REST_FRAMEWORK = {
-    # "DEFAULT_PERMISSION_CLASSES": [
-    #     "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    # ],
-    # "DEFAULT_AUTHENTICATION_CLASSES": [
-    #     "rest_framework.authentication.TokenAuthentication",
-    # ],
-    # "DEFAULT_FILTER_BACKENDS": [
-    #     "django_filters.rest_framework.DjangoFilterBackend",
-    # ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
         "rest_framework.parsers.FormParser",

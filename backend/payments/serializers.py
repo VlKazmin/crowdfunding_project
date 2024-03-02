@@ -1,3 +1,5 @@
+from django.db import IntegrityError
+
 from rest_framework import serializers
 
 from .models import Payment
@@ -23,6 +25,21 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+    def create(self, validated_data):
+        user = (
+            self.context["request"].user
+            if self.context["request"].user.is_authenticated
+            else None
+        )
+
+        try:
+            instance = Payment.objects.create(user=user, **validated_data)
+            return instance
+        except IntegrityError:
+            raise serializers.ValidationError(
+                "Неавторизованные пользователи не могут создавать платежи."
+            )
 
 
 class PaymentDetailSerializer(serializers.ModelSerializer):
