@@ -1,4 +1,8 @@
+import os
+
 import decimal
+
+from datetime import datetime
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -14,6 +18,17 @@ from .models import Payment
 def payment_success_notification(sender, instance, **kwargs):
     user = instance.user
     collect = instance.collect
+    current_date = datetime.now()
+    old_path = settings.EMAIL_FILE_PATH
+
+    new_path = os.path.join(
+        settings.EMAIL_FILE_PATH,
+        str("Платежи"),
+        str(current_date.year),
+        str(current_date.month),
+        str(current_date.day),
+        user.email,
+    )
 
     subject = "Успешный платеж"
     message = (
@@ -22,14 +37,18 @@ def payment_success_notification(sender, instance, **kwargs):
     )
 
     try:
+        settings.EMAIL_FILE_PATH = new_path
         send_mail(
             subject,
             message,
-            settings.DEFAULT_FROM_EMAIL,
+            "admin@admin.ru",
             [user.email],
         )
+
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"Ошибка отправки сообщения: {e}")
+    finally:
+        settings.EMAIL_FILE_PATH = old_path
 
 
 @receiver(post_save, sender=Payment)

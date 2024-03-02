@@ -1,3 +1,7 @@
+import os
+
+from datetime import datetime
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models.signals import pre_save, post_save
@@ -28,6 +32,16 @@ def update_slug(sender, instance, **kwargs):
 def end_collected_notification(sender, instance, **kwargs):
     title = instance.title
     author = instance.author
+    current_date = datetime.now()
+    old_path = settings.EMAIL_FILE_PATH
+
+    new_path = os.path.join(
+        settings.EMAIL_FILE_PATH,
+        str("Пожертвования_завершены"),
+        str(current_date.year),
+        str(current_date.month),
+        str(current_date.day),
+    )
 
     if instance.status == "completed":
         subject = "Сбор завершен"
@@ -37,14 +51,17 @@ def end_collected_notification(sender, instance, **kwargs):
         email_list = [author.email for author in contributors] + [author.email]
 
         try:
+            settings.EMAIL_FILE_PATH = new_path
             send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+                "admin@admin.ru",
                 email_list,
             )
         except Exception as e:
-            print(f"Error sending email: {e}")
+            print(f"Ошибка отправки сообщения: {e}")
+        finally:
+            settings.EMAIL_FILE_PATH = old_path
 
 
 @receiver(post_save, sender=Collect)
@@ -53,10 +70,23 @@ def collect_created_notification(sender, instance, created, **kwargs):
         author = instance.author
         title = instance.title
 
+        current_date = datetime.now()
+        old_path = settings.EMAIL_FILE_PATH
+        new_path = os.path.join(
+            settings.EMAIL_FILE_PATH,
+            str("Пожертвования"),
+            str(current_date.year),
+            str(current_date.month),
+            str(current_date.day),
+            str(title),
+            author.email,
+        )
+
         subject = "Сбор создан"
         message = f"Сбор '{title}' успешно создан."
 
         try:
+            settings.EMAIL_FILE_PATH = new_path
             send_mail(
                 subject,
                 message,
@@ -65,3 +95,5 @@ def collect_created_notification(sender, instance, created, **kwargs):
             )
         except Exception as e:
             print(f"Error sending email: {e}")
+        finally:
+            settings.EMAIL_FILE_PATH = old_path

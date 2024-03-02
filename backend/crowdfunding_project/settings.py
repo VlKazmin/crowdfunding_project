@@ -37,7 +37,7 @@ CSRF_TRUSTED_ORIGINS = ["https://localhost:8000"]
 
 if LOCAL:
     DEBUG = True
-    LOCAL_DB = False
+    LOCAL_DB = True
     ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 else:
@@ -188,9 +188,9 @@ DJOSER = {
     },
 }
 
-EMAIL_HOST_USER = "host"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CACHES = {

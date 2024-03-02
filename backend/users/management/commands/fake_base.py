@@ -1,7 +1,12 @@
-from faker import Faker
+import os
+
+import shutil
 
 import random
 
+from faker import Faker
+
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
@@ -13,7 +18,7 @@ from collects.texts import OCCASION_CHOICES
 from payments.models import Payment
 from users.models import CustomUser
 
-QUANITY = 10
+QUANITY = 1500
 
 
 class Command(BaseCommand):
@@ -30,8 +35,10 @@ class Command(BaseCommand):
 
         if clear:
             self.clear_database()
+            self.clear_email_lolder()
         else:
             self.clear_database()
+            self.clear_email_lolder()
             self.populate_users()
             self.populate_collects()
             self.populate_payments()
@@ -52,8 +59,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Суперпользователь создан."))
         except IntegrityError:
             pass
-
-        self.stdout.write(self.style.SUCCESS("Пользователи созданы."))
 
         for _ in range(QUANITY):
             try:
@@ -131,4 +136,12 @@ class Command(BaseCommand):
 
     def clear_database(self):
         call_command("flush", "--noinput")
+
         self.stdout.write(self.style.SUCCESS("База очищена."))
+
+    def clear_email_lolder(self):
+        email_path = settings.EMAIL_FILE_PATH
+        shutil.rmtree(email_path)
+        os.makedirs(email_path)
+
+        self.stdout.write(self.style.SUCCESS("Вся почта успешно удалена."))
